@@ -215,7 +215,7 @@ module SearchCopGrammar
       def parse(value)
         return value..value unless value.is_a?(::String)
 
-        if value =~ /^[0-9]+ (hour|day|week|month|year)s{0,1} (ago)$/
+        if value =~ /^[0-9]+ (second|minute|hour|day|week|month|year)s{0,1} (ago)$/
           number, period, ago = value.split(" ")
           time = number.to_i.send(period.to_sym).send(ago.to_sym)
           time..::Time.now

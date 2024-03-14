@@ -98,6 +98,7 @@ module SearchCop
       alias :visit_Fixnum :quote
       alias :visit_Symbol :quote
       alias :visit_Integer :quote
+      alias :visit_ActiveSupport_TimeWithZone :quote
 
       # rubocop:enable Naming/MethodName
     end

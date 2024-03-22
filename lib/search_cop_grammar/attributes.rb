@@ -250,10 +250,6 @@ module SearchCopGrammar
         between(parse(value)).not
       end
 
-      def gt(value)
-        super parse(value).last
-      end
-
       def between(range)
         gteq(range.first).and(lteq(range.last))
       end

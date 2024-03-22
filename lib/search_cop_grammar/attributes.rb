@@ -215,21 +215,28 @@ module SearchCopGrammar
       def parse(value)
         return value..value unless value.is_a?(::String)
 
-        if value =~ /^[0-9]+ (second|minute|hour|day|week|month|year)s{0,1} (ago)$/
-          number, period, ago = value.split(" ")
+        if (match = value.match(/^([0-9]+) (second|minute|hour|day|week|month|year)s{0,1} (ago)$/))
+          _, number, period, ago = *match
+
           time = number.to_i.send(period.to_sym).send(ago.to_sym)
-          time..::Time.now
+          from = time.respond_to?("beginning_of_#{period}") ? time.send("beginning_of_#{period}") : time
+          to = time.respond_to?("end_of_#{period}") ? time.send("end_of_#{period}") : time
+
+          from..to
         elsif value =~ /^[0-9]{4}$/
-          ::Time.new(value).beginning_of_year..::Time.new(value).end_of_year
+          time = ::Time.new(value).in_time_zone
+          time.beginning_of_year..time.end_of_year
         elsif value =~ %r{^([0-9]{4})(\.|-|/)([0-9]{1,2})$}
-          ::Time.new(Regexp.last_match(1), Regexp.last_match(3), 15).beginning_of_month..::Time.new(Regexp.last_match(1), Regexp.last_match(3), 15).end_of_month
+          time = ::Time.new(Regexp.last_match(1), Regexp.last_match(3), 15).in_time_zone
+          time.beginning_of_month..time.end_of_month
         elsif value =~ %r{^([0-9]{1,2})(\.|-|/)([0-9]{4})$}
-          ::Time.new(Regexp.last_match(3), Regexp.last_match(1), 15).beginning_of_month..::Time.new(Regexp.last_match(3), Regexp.last_match(1), 15).end_of_month
+          time = ::Time.new(Regexp.last_match(3), Regexp.last_match(1), 15).in_time_zone
+          time.beginning_of_month..time.end_of_month
         elsif value =~ %r{^[0-9]{4}(\.|-|/)[0-9]{1,2}(\.|-|/)[0-9]{1,2}$} || value =~ %r{^[0-9]{1,2}(\.|-|/)[0-9]{1,2}(\.|-|/)[0-9]{4}$}
-          time = ::Time.parse(value)
+          time = ::Time.parse(value).in_time_zone
           time.beginning_of_day..time.end_of_day
         elsif value =~ %r{[0-9]{4}(\.|-|/)[0-9]{1,2}(\.|-|/)[0-9]{1,2}} || value =~ %r{[0-9]{1,2}(\.|-|/)[0-9]{1,2}(\.|-|/)[0-9]{4}}
-          time = ::Time.parse(value)
+          time = ::Time.parse(value).in_time_zone
           time..time
         else
           raise ArgumentError
@@ -265,16 +272,21 @@ module SearchCopGrammar
         if value =~ /^[0-9]+ (day|week|month|year)s{0,1} (ago)$/
           number, period, ago = value.split(" ")
           time = number.to_i.send(period.to_sym).send(ago.to_sym)
-          time.to_date..::Date.today
+          from = time.respond_to?("beginning_of_#{period}") ? time.send("beginning_of_#{period}") : time
+          to = time.respond_to?("end_of_#{period}") ? time.send("end_of_#{period}") : time
+          from.to_date..to.to_date
         elsif value =~ /^[0-9]{4}$/
-          ::Date.new(value.to_i).beginning_of_year..::Date.new(value.to_i).end_of_year
+          date = ::Date.new(value.to_i).in_time_zone
+          date.beginning_of_year.to_date..date.end_of_year.to_date
         elsif value =~ %r{^([0-9]{4})(\.|-|/)([0-9]{1,2})$}
-          ::Date.new(Regexp.last_match(1).to_i, Regexp.last_match(3).to_i, 15).beginning_of_month..::Date.new(Regexp.last_match(1).to_i, Regexp.last_match(3).to_i, 15).end_of_month
+          date = ::Date.new(Regexp.last_match(1).to_i, Regexp.last_match(3).to_i, 15).in_time_zone
+          date.beginning_of_month.to_date..date.end_of_month.to_date
         elsif value =~ %r{^([0-9]{1,2})(\.|-|/)([0-9]{4})$}
-          ::Date.new(Regexp.last_match(3).to_i, Regexp.last_match(1).to_i, 15).beginning_of_month..::Date.new(Regexp.last_match(3).to_i, Regexp.last_match(1).to_i, 15).end_of_month
+          date = ::Date.new(Regexp.last_match(3).to_i, Regexp.last_match(1).to_i, 15).in_time_zone
+          date.beginning_of_month.to_date..date.end_of_month.to_date
         elsif value =~ %r{[0-9]{4}(\.|-|/)[0-9]{1,2}(\.|-|/)[0-9]{1,2}} || value =~ %r{[0-9]{1,2}(\.|-|/)[0-9]{1,2}(\.|-|/)[0-9]{4}}
-          date = ::Date.parse(value)
-          date..date
+          date = ::Date.parse(value).in_time_zone
+          date.to_date..date.to_date
         else
           raise ArgumentError
         end

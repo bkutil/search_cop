@@ -66,6 +66,13 @@ class DatetimeTest < SearchCop::TestCase
     refute_includes Product.search("created_at <= 2014-05-01"), product
   end
 
+  def test_hours_ago_equals
+    product = create(:product, created_at: 5.hours.ago)
+
+    assert_includes Product.search("created_at = '5 hours ago'"), product
+    refute_includes Product.search("created_at = '6 hours ago'"), product
+  end
+
   def test_hours_ago_less
     product = create(:product, created_at: 5.hours.ago)
 
@@ -101,6 +108,13 @@ class DatetimeTest < SearchCop::TestCase
     assert_includes Product.search("created_at >= '6 hours ago'"), product
   end
 
+  def test_days_ago_equals
+    product = create(:product, created_at: 2.days.ago)
+
+    assert_includes Product.search("created_at = '2 days ago'"), product
+    refute_includes Product.search("created_at = '3 days ago'"), product
+  end
+
   def test_days_ago_less
     product = create(:product, created_at: 2.days.ago)
 
@@ -127,6 +141,13 @@ class DatetimeTest < SearchCop::TestCase
 
     refute_includes Product.search("created_at >= '1 day ago'"), product
     assert_includes Product.search("created_at >= '3 days ago'"), product
+  end
+
+  def test_weeks_ago_equals
+    product = create(:product, created_at: 2.weeks.ago)
+
+    assert_includes Product.search("created_at = '2 weeks ago'"), product
+    refute_includes Product.search("created_at = '3 weeks ago'"), product
   end
 
   def test_weeks_ago_less
@@ -157,6 +178,13 @@ class DatetimeTest < SearchCop::TestCase
     assert_includes Product.search("created_at >= '3 weeks ago'"), product
   end
 
+  def test_months_ago_equals
+    product = create(:product, created_at: 2.months.ago)
+
+    assert_includes Product.search("created_at = '2 months ago'"), product
+    refute_includes Product.search("created_at = '3 months ago'"), product
+  end
+
   def test_months_ago_less
     product = create(:product, created_at: 2.months.ago)
 
@@ -183,6 +211,13 @@ class DatetimeTest < SearchCop::TestCase
 
     refute_includes Product.search("created_at >= '1 months ago'"), product
     assert_includes Product.search("created_at >= '3 months ago'"), product
+  end
+
+  def test_years_ago_equals
+    product = create(:product, created_at: 2.years.ago)
+
+    assert_includes Product.search("created_at = '2 years ago'"), product
+    refute_includes Product.search("created_at = '3 years ago'"), product
   end
 
   def test_years_ago_less
